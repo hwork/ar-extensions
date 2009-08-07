@@ -539,5 +539,17 @@ class FindersTest< TestCaseSuperClass
     assert_equal Book.find(:first), Book.find(:first, :conditions => [""])
     assert_equal Book.find(:first), Book.find(:first, :conditions => ["",{}])
   end
-    
+
+  def test_find_comparison_with_multiple_table_conditions
+    now = Time.now
+    Book.destroy_all
+    Topic.destroy_all
+    t1 = Topic.create!(:author_name => 'Longfellow')
+    b1 = Book.create!(:topic_id => t1.id, :created_at => now - 1)
+    t2 = Topic.create!(:author_name => 'Hawthorne')
+    b2 = Book.create!(:topic_id => t2.id, :created_at => now)
+    topics = Topic.find( :all, :joins => :books, :conditions =>
+      { :books => { :created_at_lt => now } } )
+    assert_equal [t1], topics
+  end
 end
